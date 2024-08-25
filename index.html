@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo Aberto 2D</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+        canvas {
+            display: block;
+            background-color: #008000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const worldWidth = 2000; // Largura do mapa
+        const worldHeight = 2000; // Altura do mapa
+        const tileSize = 50; // Tamanho do personagem
+
+        let player = {
+            x: worldWidth / 2 - tileSize / 2,
+            y: worldHeight / 2 - tileSize / 2,
+            width: tileSize,
+            height: tileSize,
+            color: '#FF0000',
+            speed: 5
+        };
+
+        let camera = {
+            x: player.x - canvas.width / 2,
+            y: player.y - canvas.height / 2,
+            width: canvas.width,
+            height: canvas.height
+        };
+
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    player.y -= player.speed;
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    player.y += player.speed;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    player.x -= player.speed;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    player.x += player.speed;
+                    break;
+            }
+
+            // Limita o jogador às bordas do mundo
+            player.x = Math.max(0, Math.min(worldWidth - player.width, player.x));
+            player.y = Math.max(0, Math.min(worldHeight - player.height, player.y));
+
+            // Atualiza a câmera
+            camera.x = player.x - canvas.width / 2 + player.width / 2;
+            camera.y = player.y - canvas.height / 2 + player.height / 2;
+
+            camera.x = Math.max(0, Math.min(worldWidth - camera.width, camera.x));
+            camera.y = Math.max(0, Math.min(worldHeight - camera.height, camera.y));
+        });
+
+        function drawWorld() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha o chão
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(-camera.x, -camera.y, worldWidth, worldHeight);
+
+            // Desenha o jogador
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x - camera.x, player.y - camera.y, player.width, player.height);
+
+            // Desenha algumas "árvores" no mundo como obstáculos
+            ctx.fillStyle = '#006400';
+            for (let i = 0; i < 10; i++) {
+                let treeX = Math.random() * worldWidth;
+                let treeY = Math.random() * worldHeight;
+                ctx.fillRect(treeX - camera.x, treeY - camera.y, 50, 50);
+            }
+
+            requestAnimationFrame(drawWorld);
+        }
+
+        drawWorld();
+    </script>
+</body>
+</html>
